@@ -4,7 +4,7 @@ using FleetMaintenanceIntelligence.Infrastructure.Persistence;
 
 namespace FleetMaintenanceIntelligence.Infrastructure.DependencyInjection;
 
-internal static class InMemorySeed
+public static class InMemorySeed
 {
     public static readonly Guid DemoVehicleId = Guid.Parse("11111111-1111-1111-1111-111111111111");
 

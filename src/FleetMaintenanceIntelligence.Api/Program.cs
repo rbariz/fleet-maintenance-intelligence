@@ -12,7 +12,14 @@ builder.Services.AddInfrastructure();
 var app = builder.Build();
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();
 app.MapControllers();
+
+app.MapGet("/fleet-dashboard", context =>
+{
+    context.Response.Redirect("/fleet-dashboard.html");
+    return Task.CompletedTask;
+});
 
 app.Services.SeedInMemoryData();
 

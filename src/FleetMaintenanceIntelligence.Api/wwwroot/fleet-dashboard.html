@@ -1,0 +1,193 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Fleet Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 24px;
+            background: #f8fafc;
+            color: #0f172a;
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 16px;
+            box-shadow: 0 8px 24px rgba(15,23,42,.06);
+        }
+
+        .label {
+            font-size: 13px;
+            color: #64748b;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .value {
+            font-size: 30px;
+            font-weight: 700;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border: 1px solid #e2e8f0;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 12px 10px;
+            border-bottom: 1px solid #e2e8f0;
+            vertical-align: top;
+        }
+
+        th {
+            background: #f1f5f9;
+            font-size: 13px;
+            text-transform: uppercase;
+            color: #475569;
+        }
+
+        .high {
+            color: #b45309;
+            font-weight: 700;
+        }
+
+        .critical {
+            color: #991b1b;
+            font-weight: 700;
+        }
+
+        .medium {
+            color: #1d4ed8;
+            font-weight: 700;
+        }
+
+        .low {
+            color: #166534;
+            font-weight: 700;
+        }
+
+        button, a.btn {
+            padding: 10px 14px;
+            border: none;
+            border-radius: 10px;
+            background: #2563eb;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .muted {
+            color: #64748b;
+        }
+    </style>
+</head>
+<body>
+    <h1>Fleet Maintenance Dashboard</h1>
+    <div class="muted">Minimal demo for maintenance alerts and vehicle timeline.</div>
+
+    <div class="toolbar">
+        <button onclick="evaluateAlerts()">Evaluate Alerts</button>
+        <button onclick="loadDashboard()">Refresh</button>
+        <a id="timelineLink" class="btn" href="#" target="_blank">Open Timeline</a>
+        <div id="lastRefresh" class="muted">Last refresh: -</div>
+    </div>
+
+    <div class="grid">
+        <div class="card">
+            <div class="label">Demo Vehicle</div>
+            <div id="vehicleId" class="value" style="font-size:16px">-</div>
+        </div>
+        <div class="card">
+            <div class="label">Total Alerts</div>
+            <div id="totalAlerts" class="value">0</div>
+        </div>
+        <div class="card">
+            <div class="label">Open Alerts</div>
+            <div id="openAlerts" class="value">0</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Latest Alerts</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>Severity</th>
+                    <th>Title</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody id="alertRows"></tbody>
+        </table>
+    </div>
+
+    <script>
+        let demoVehicleId = null;
+
+        async function loadDashboard() {
+            const response = await fetch('/api/fleet-dashboard');
+            const data = await response.json();
+
+            demoVehicleId = data.demoVehicleId;
+            document.getElementById('vehicleId').textContent = demoVehicleId;
+            document.getElementById('totalAlerts').textContent = data.totalAlerts;
+            document.getElementById('openAlerts').textContent = data.openAlerts;
+            document.getElementById('timelineLink').href = `/api/vehicles/${demoVehicleId}/timeline`;
+
+            const rows = document.getElementById('alertRows');
+            rows.innerHTML = '';
+
+            for (const item of data.latestAlerts) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${new Date(item.createdAtUtc).toLocaleString()}</td>
+                    <td class="${item.severity}">${item.severity}</td>
+                    <td>${item.title}</td>
+                    <td>${item.description}</td>
+                `;
+                rows.appendChild(tr);
+            }
+
+            document.getElementById('lastRefresh').textContent =
+                'Last refresh: ' + new Date().toLocaleString();
+        }
+
+        async function evaluateAlerts() {
+            if (!demoVehicleId) {
+                await loadDashboard();
+            }
+
+            await fetch(`/api/maintenancealerts/evaluate/${demoVehicleId}`, { method: 'POST' });
+            await loadDashboard();
+        }
+
+        loadDashboard();
+        setInterval(loadDashboard, 5000);
+    </script>
+</body>
+</html>

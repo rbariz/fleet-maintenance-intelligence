@@ -1,4 +1,5 @@
 ﻿using FleetMaintenanceIntelligence.Application.UseCases.EvaluateMaintenanceAlerts;
+using FleetMaintenanceIntelligence.Application.UseCases.GetFleetDashboard;
 using FleetMaintenanceIntelligence.Application.UseCases.GetMaintenanceAlerts;
 using FleetMaintenanceIntelligence.Application.UseCases.GetVehicleTimeline;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,6 +18,7 @@ namespace FleetMaintenanceIntelligence.Application.DependencyInjection
             services.AddScoped<EvaluateMaintenanceAlertsHandler>();
             services.AddScoped<GetMaintenanceAlertsHandler>();
             services.AddScoped<GetVehicleTimelineHandler>();
+            services.AddScoped<GetFleetDashboardHandler>();
             return services;
         }
     }
