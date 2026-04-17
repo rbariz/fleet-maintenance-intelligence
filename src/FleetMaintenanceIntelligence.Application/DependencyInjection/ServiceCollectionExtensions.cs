@@ -1,4 +1,5 @@
 ﻿using FleetMaintenanceIntelligence.Application.UseCases.EvaluateMaintenanceAlerts;
+using FleetMaintenanceIntelligence.Application.UseCases.GetMaintenanceAlerts;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -13,6 +14,7 @@ namespace FleetMaintenanceIntelligence.Application.DependencyInjection
         public static IServiceCollection AddApplication(this IServiceCollection services)
         {
             services.AddScoped<EvaluateMaintenanceAlertsHandler>();
+            services.AddScoped<GetMaintenanceAlertsHandler>();
             return services;
         }
     }

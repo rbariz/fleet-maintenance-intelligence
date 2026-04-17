@@ -193,6 +193,24 @@ namespace FleetMaintenanceIntelligence.Application.UseCases.EvaluateMaintenanceA
                 severity,
                 nowUtc);
 
+            //await _alertRepository.AddAsync(alert, cancellationToken);
+            //createdTitles.Add(title);
+            var exists = await _alertRepository.ExistsOpenAlertAsync(
+    vehicleId,
+    title,
+    cancellationToken);
+
+            if (exists)
+                return;
+
+                alert = new MaintenanceAlert(
+                Guid.NewGuid(),
+                vehicleId,
+                title,
+                description,
+                severity,
+                nowUtc);
+
             await _alertRepository.AddAsync(alert, cancellationToken);
             createdTitles.Add(title);
         }
