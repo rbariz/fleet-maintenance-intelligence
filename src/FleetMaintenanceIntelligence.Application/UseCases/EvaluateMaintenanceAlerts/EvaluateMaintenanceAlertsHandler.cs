@@ -177,33 +177,23 @@ namespace FleetMaintenanceIntelligence.Application.UseCases.EvaluateMaintenanceA
         }
 
         private async Task CreateAlertAsync(
-            Guid vehicleId,
-            string title,
-            string description,
-            AlertSeverity severity,
-            DateTime nowUtc,
-            List<string> createdTitles,
-            CancellationToken cancellationToken)
+    Guid vehicleId,
+    string title,
+    string description,
+    AlertSeverity severity,
+    DateTime nowUtc,
+    List<string> createdTitles,
+    CancellationToken cancellationToken)
         {
-            var alert = new MaintenanceAlert(
-                Guid.NewGuid(),
+            var exists = await _alertRepository.ExistsOpenAlertAsync(
                 vehicleId,
                 title,
-                description,
-                severity,
-                nowUtc);
-
-            //await _alertRepository.AddAsync(alert, cancellationToken);
-            //createdTitles.Add(title);
-            var exists = await _alertRepository.ExistsOpenAlertAsync(
-    vehicleId,
-    title,
-    cancellationToken);
+                cancellationToken);
 
             if (exists)
                 return;
 
-                alert = new MaintenanceAlert(
+            var alert = new MaintenanceAlert(
                 Guid.NewGuid(),
                 vehicleId,
                 title,
