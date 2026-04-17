@@ -33,6 +33,7 @@
             border-radius: 14px;
             padding: 16px;
             box-shadow: 0 8px 24px rgba(15,23,42,.06);
+            margin-bottom: 24px;
         }
 
         .label {
@@ -129,16 +130,32 @@
         .muted {
             color: #64748b;
         }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit,minmax(260px,1fr));
+            gap: 16px;
+        }
+
+        ul {
+            margin: 0;
+            padding-left: 18px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
     </style>
 </head>
 <body>
     <h1>Fleet Maintenance Dashboard</h1>
-    <div class="muted">Minimal demo for maintenance alerts and vehicle timeline.</div>
+    <div class="muted">Minimal demo for maintenance alerts, vehicle summary, and timeline.</div>
 
     <div class="toolbar">
         <button onclick="evaluateAlerts()">Evaluate Alerts</button>
         <button onclick="loadDashboard()">Refresh</button>
         <a id="timelineLink" class="btn" href="#" target="_blank">Open Timeline</a>
+        <a id="summaryLink" class="btn btn-secondary" href="#" target="_blank">Open Summary JSON</a>
         <div id="lastRefresh" class="muted">Last refresh: -</div>
     </div>
 
@@ -154,6 +171,36 @@
         <div class="card">
             <div class="label">Open Alerts</div>
             <div id="openAlerts" class="value">0</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Vehicle Summary</h2>
+        <div class="summary-grid">
+            <div>
+                <div class="label">Identity</div>
+                <div id="vehicleIdentity">-</div>
+            </div>
+            <div>
+                <div class="label">Status</div>
+                <div id="vehicleStatus">-</div>
+            </div>
+            <div>
+                <div class="label">Mileage</div>
+                <div id="vehicleMileage">-</div>
+            </div>
+            <div>
+                <div class="label">Latest Telemetry</div>
+                <div id="latestTelemetry">-</div>
+            </div>
+            <div>
+                <div class="label">Maintenance Plans</div>
+                <ul id="maintenancePlans"></ul>
+            </div>
+            <div>
+                <div class="label">Open Alerts</div>
+                <ul id="openAlertsList"></ul>
+            </div>
         </div>
     </div>
 
@@ -182,10 +229,47 @@
             const dashboard = await dashboardResponse.json();
 
             demoVehicleId = dashboard.demoVehicleId;
+
             document.getElementById('vehicleId').textContent = demoVehicleId;
             document.getElementById('totalAlerts').textContent = dashboard.totalAlerts;
             document.getElementById('openAlerts').textContent = dashboard.openAlerts;
             document.getElementById('timelineLink').href = `/api/vehicles/${demoVehicleId}/timeline`;
+            document.getElementById('summaryLink').href = `/api/vehicles/${demoVehicleId}/summary`;
+
+            const summaryResponse = await fetch(`/api/vehicles/${demoVehicleId}/summary`);
+            const summary = await summaryResponse.json();
+
+            document.getElementById('vehicleIdentity').textContent =
+                `${summary.brand} ${summary.model} (${summary.year}) - ${summary.registrationNumber}`;
+
+            document.getElementById('vehicleStatus').textContent = summary.status;
+            document.getElementById('vehicleMileage').textContent = `${summary.currentMileageKm} km`;
+
+            if (summary.latestTelemetry) {
+                document.getElementById('latestTelemetry').textContent =
+                    `Fuel: ${summary.latestTelemetry.fuelLevelPercent}% | Battery: ${summary.latestTelemetry.batteryVoltage}V | Temp: ${summary.latestTelemetry.engineTemperatureCelsius}°C`;
+            } else {
+                document.getElementById('latestTelemetry').textContent = '-';
+            }
+
+            const plansList = document.getElementById('maintenancePlans');
+            plansList.innerHTML = '';
+            for (const plan of summary.maintenancePlans) {
+                const li = document.createElement('li');
+                li.textContent =
+                    `${plan.name} (${plan.planType})` +
+                    `${plan.everyKm ? ` | Every ${plan.everyKm} km` : ''}` +
+                    `${plan.everyDays ? ` | Every ${plan.everyDays} days` : ''}`;
+                plansList.appendChild(li);
+            }
+
+            const openAlertsList = document.getElementById('openAlertsList');
+            openAlertsList.innerHTML = '';
+            for (const alert of summary.openAlerts) {
+                const li = document.createElement('li');
+                li.textContent = `${alert.title} (${alert.severity}, ${alert.status})`;
+                openAlertsList.appendChild(li);
+            }
 
             const rows = document.getElementById('alertRows');
             rows.innerHTML = '';
