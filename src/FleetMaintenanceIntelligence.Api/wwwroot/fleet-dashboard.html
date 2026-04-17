@@ -88,6 +88,21 @@
             font-weight: 700;
         }
 
+        .open {
+            color: #991b1b;
+            font-weight: 700;
+        }
+
+        .acknowledged {
+            color: #b45309;
+            font-weight: 700;
+        }
+
+        .resolved {
+            color: #166534;
+            font-weight: 700;
+        }
+
         button, a.btn {
             padding: 10px 14px;
             border: none;
@@ -98,6 +113,17 @@
             cursor: pointer;
             text-decoration: none;
             display: inline-block;
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #0f172a;
+        }
+
+        .action-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
         }
 
         .muted {
@@ -138,8 +164,10 @@
                 <tr>
                     <th>Time</th>
                     <th>Severity</th>
+                    <th>Status</th>
                     <th>Title</th>
                     <th>Description</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody id="alertRows"></tbody>
@@ -150,26 +178,43 @@
         let demoVehicleId = null;
 
         async function loadDashboard() {
-            const response = await fetch('/api/fleet-dashboard');
-            const data = await response.json();
+            const dashboardResponse = await fetch('/api/fleet-dashboard');
+            const dashboard = await dashboardResponse.json();
 
-            demoVehicleId = data.demoVehicleId;
+            demoVehicleId = dashboard.demoVehicleId;
             document.getElementById('vehicleId').textContent = demoVehicleId;
-            document.getElementById('totalAlerts').textContent = data.totalAlerts;
-            document.getElementById('openAlerts').textContent = data.openAlerts;
+            document.getElementById('totalAlerts').textContent = dashboard.totalAlerts;
+            document.getElementById('openAlerts').textContent = dashboard.openAlerts;
             document.getElementById('timelineLink').href = `/api/vehicles/${demoVehicleId}/timeline`;
 
             const rows = document.getElementById('alertRows');
             rows.innerHTML = '';
 
-            for (const item of data.latestAlerts) {
+            for (const item of dashboard.latestAlerts) {
+                const acknowledgeButton =
+                    item.status === 'open'
+                        ? `<button class="btn-secondary" onclick="acknowledgeAlert('${item.id}')">Acknowledge</button>`
+                        : '';
+
+                const resolveButton =
+                    (item.status === 'open' || item.status === 'acknowledged')
+                        ? `<button onclick="resolveAlert('${item.id}')">Resolve</button>`
+                        : '';
+
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>${new Date(item.createdAtUtc).toLocaleString()}</td>
-                    <td class="${item.severity}">${item.severity}</td>
-                    <td>${item.title}</td>
-                    <td>${item.description}</td>
-                `;
+                        <td>${new Date(item.createdAtUtc).toLocaleString()}</td>
+                        <td class="${item.severity}">${item.severity}</td>
+                        <td class="${item.status}">${item.status}</td>
+                        <td>${item.title}</td>
+                        <td>${item.description}</td>
+                        <td>
+                            <div class="action-group">
+                                ${acknowledgeButton}
+                                ${resolveButton}
+                            </div>
+                        </td>
+                    `;
                 rows.appendChild(tr);
             }
 
@@ -183,6 +228,16 @@
             }
 
             await fetch(`/api/maintenancealerts/evaluate/${demoVehicleId}`, { method: 'POST' });
+            await loadDashboard();
+        }
+
+        async function acknowledgeAlert(alertId) {
+            await fetch(`/api/maintenancealerts/${alertId}/acknowledge`, { method: 'POST' });
+            await loadDashboard();
+        }
+
+        async function resolveAlert(alertId) {
+            await fetch(`/api/maintenancealerts/${alertId}/resolve`, { method: 'POST' });
             await loadDashboard();
         }
 
