@@ -110,3 +110,6 @@ Approche :
 - modélisation métier
 - règles de maintenance
 - évolution vers prédictif
+
+
+See docs/architecture.md for full system design.
