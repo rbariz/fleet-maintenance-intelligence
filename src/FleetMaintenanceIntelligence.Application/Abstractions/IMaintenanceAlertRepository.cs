@@ -10,5 +10,7 @@ namespace FleetMaintenanceIntelligence.Application.Abstractions
     Guid vehicleId,
     string title,
     CancellationToken cancellationToken = default);
+
+        Task<IReadOnlyList<MaintenanceAlert>> GetByVehicleIdAsync(Guid vehicleId, CancellationToken cancellationToken = default);
     }
 }

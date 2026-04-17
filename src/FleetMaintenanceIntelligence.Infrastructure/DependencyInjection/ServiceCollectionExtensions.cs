@@ -14,7 +14,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IFleetVehicleRepository, InMemoryFleetVehicleRepository>();
         services.AddScoped<IMaintenancePlanRepository, InMemoryMaintenancePlanRepository>();
         services.AddScoped<IVehicleTelemetrySnapshotRepository, InMemoryVehicleTelemetrySnapshotRepository>();
-        services.AddScoped<IMaintenanceAlertRepository, InMemoryMaintenanceAlertRepository>();
+        services.AddScoped<IMaintenanceAlertRepository, InMemoryMaintenanceAlertRepository>(); 
+        services.AddScoped<IMaintenanceRecordRepository, InMemoryMaintenanceRecordRepository>();
         services.AddScoped<IUnitOfWork, InMemoryUnitOfWork>();
         services.AddSingleton<IClock, SystemClock>();
 

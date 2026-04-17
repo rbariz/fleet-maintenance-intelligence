@@ -12,6 +12,16 @@ public sealed class InMemoryVehicleTelemetrySnapshotRepository : IVehicleTelemet
         _store = store;
     }
 
+    public Task<IReadOnlyList<VehicleTelemetrySnapshot>> GetByVehicleIdAsync(Guid vehicleId, CancellationToken cancellationToken = default)
+    {
+        var items = _store.TelemetrySnapshots
+            .Where(x => x.VehicleId == vehicleId)
+            .OrderByDescending(x => x.RecordedAtUtc)
+            .ToList();
+
+        return Task.FromResult<IReadOnlyList<VehicleTelemetrySnapshot>>(items);
+    }
+
     public Task<VehicleTelemetrySnapshot?> GetLatestByVehicleIdAsync(Guid vehicleId, CancellationToken cancellationToken = default)
     {
         var item = _store.TelemetrySnapshots

@@ -58,5 +58,30 @@ internal static class InMemorySeed
         store.MaintenancePlans.Add(maintenancePlan1);
         store.MaintenancePlans.Add(maintenancePlan2);
         store.TelemetrySnapshots.Add(snapshot);
+
+        var record1 = new MaintenanceRecord(
+    Guid.NewGuid(),
+    vehicle.Id,
+    maintenancePlan1.Id,
+    MaintenanceRecordType.Preventive,
+    "Initial oil change",
+    5000,
+    1200,
+    "MAD",
+    now.AddMonths(-4));
+
+        var record2 = new MaintenanceRecord(
+            Guid.NewGuid(),
+            vehicle.Id,
+            maintenancePlan2.Id,
+            MaintenanceRecordType.Inspection,
+            "Quarterly inspection completed",
+            8000,
+            800,
+            "MAD",
+            now.AddDays(-100));
+
+        store.MaintenanceRecords.Add(record1);
+        store.MaintenanceRecords.Add(record2);
     }
 }

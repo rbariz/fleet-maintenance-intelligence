@@ -40,4 +40,14 @@ public sealed class InMemoryMaintenanceAlertRepository : IMaintenanceAlertReposi
 
         return Task.FromResult(exists);
     }
+
+    public Task<IReadOnlyList<MaintenanceAlert>> GetByVehicleIdAsync(Guid vehicleId, CancellationToken cancellationToken = default)
+    {
+        var items = _store.MaintenanceAlerts
+            .Where(x => x.VehicleId == vehicleId)
+            .OrderByDescending(x => x.CreatedAtUtc)
+            .ToList();
+
+        return Task.FromResult<IReadOnlyList<MaintenanceAlert>>(items);
+    }
 }
