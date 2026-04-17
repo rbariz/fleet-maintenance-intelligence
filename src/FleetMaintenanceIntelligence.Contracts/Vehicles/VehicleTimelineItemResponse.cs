@@ -7,6 +7,4 @@
     string Description,
     string Severity
 );
-
-
 }
